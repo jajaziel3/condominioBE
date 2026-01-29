@@ -1,12 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Events\MensajeEnviado;
 use App\Models\Mensaje;
-
-Route::get('/', function () {
-    return view('welcome');
-});
+use Illuminate\Support\Facades\Route;
 
 Route::get('/test-broadcast', function () {
     // Obtener el último mensaje
@@ -26,9 +22,6 @@ Route::get('/test-broadcast', function () {
     return response()->json([
         'success' => true,
         'message' => 'Test broadcast sent',
-        'mensaje' => [
-            'id' => $mensaje->id_mensaje,
-            'usuario' => $mensaje->usuario->nombre
-        ]
+        'mensaje' => $mensaje
     ]);
 });

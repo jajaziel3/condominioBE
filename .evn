@@ -1,0 +1,5 @@
+# Configuración de Laravel Reverb para React
+VITE_REVERB_APP_KEY=kzuaslwikou32v0ohjs6
+VITE_REVERB_HOST=localhost
+VITE_REVERB_PORT=8080
+VITE_REVERB_SCHEME=http
