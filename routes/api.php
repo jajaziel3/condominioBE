@@ -22,8 +22,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}/estado', [MensajeController::class, 'actualizarEstado']);
         Route::get('/estadisticas/general', [MensajeController::class, 'estadisticas']);
     });
+
+    // Notificaciones
+    Route::prefix('notificaciones')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\NotificationController::class, 'store']);
+        Route::post('/{id}/marcar-leida', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'show']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
+    });
 });
 
 // Ruta pública para obtener mensajes
 Route::get('/mensajes/listar', [MensajeController::class, 'listar']);
+
+// Ruta pública para listar notificaciones (permite lectura sin autenticación para la app)
+Route::get('/notificaciones', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
 

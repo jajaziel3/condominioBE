@@ -32,9 +32,14 @@ class MensajeController extends Controller
 
             $mensaje->load('usuario');
 
-            // Broadcastear el nuevo mensaje
+            // Broadcastear el nuevo mensaje (no bloquear la respuesta si falla el broadcaster)
             \Log::info('Disparando evento MensajeEnviado para mensaje:', ['id' => $mensaje->id_mensaje]);
-            MensajeEnviado::dispatch($mensaje);
+            try {
+                MensajeEnviado::dispatch($mensaje);
+            } catch (\Exception $e) {
+                \Log::warning('No fue posible difundir MensajeEnviado (broadcast falló):', ['error' => $e->getMessage()]);
+                // No interrumpimos la respuesta al cliente
+            }
 
             return response()->json([
                 'success' => true,

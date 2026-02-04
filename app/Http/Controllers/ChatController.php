@@ -27,11 +27,15 @@ class ChatController extends Controller
             // Cargar la relación del usuario
             $chatMessage->load('user');
 
-            // Disparar el evento para WebSocket
-            broadcast(new ChatMessageSent(
-                $request->user()->name,
-                $validated['content']
-            ));
+            // Disparar el evento para WebSocket (no bloquear si falla)
+            try {
+                broadcast(new ChatMessageSent(
+                    $request->user()->name,
+                    $validated['content']
+                ));
+            } catch (\Exception $e) {
+                \Log::warning('Broadcast ChatMessageSent falló:', ['error' => $e->getMessage()]);
+            }
 
             return response()->json([
                 'success' => true,
