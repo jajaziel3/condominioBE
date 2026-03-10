@@ -10,6 +10,10 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/verify-email', [AuthController::class, 'verifyEmail']);
 Route::post('/auth/resend-verification', [AuthController::class, 'resendVerificationEmail']);
 
+// Recuperación de contraseña
+Route::post('/auth/request-password-reset', [AuthController::class, 'requestPasswordReset']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+
 // Rutas protegidas por Sanctum
 Route::middleware('auth:sanctum')->group(function () {
     // Rutas de autenticación

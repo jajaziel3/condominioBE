@@ -27,6 +27,8 @@ class Usuario extends Authenticatable
         'activo',
         'email_verified_at',
         'email_verification_token',
+        'password_reset_code',
+        'password_reset_expires_at',
     ];
 
     protected $hidden = [
@@ -36,6 +38,7 @@ class Usuario extends Authenticatable
     protected $casts = [
         'activo' => 'boolean',
         'email_verified_at' => 'datetime',
+        'password_reset_expires_at' => 'datetime',
     ];
 
     /**

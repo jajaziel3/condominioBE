@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\PasswordResetCodeMail;
 
 class AuthController extends Controller
 {
@@ -147,6 +149,74 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Se ha reenviado el correo de verificación'
+        ]);
+    }
+
+    /**
+     * Solicitar código de recuperación de contraseña
+     */
+    public function requestPasswordReset(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:usuarios',
+        ]);
+
+        $usuario = Usuario::where('email', $validated['email'])->first();
+
+        // generar código de 6 dígitos
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $usuario->update([
+            'password_reset_code' => $code,
+            'password_reset_expires_at' => now()->addMinutes(10),
+        ]);
+
+        Mail::send(new PasswordResetCodeMail($usuario));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Código de recuperación enviado al correo electrónico'
+        ]);
+    }
+
+    /**
+     * Restablecer la contraseña usando código
+     */
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:usuarios',
+            'code' => 'required|string|size:6',
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        $usuario = Usuario::where('email', $validated['email'])->first();
+
+        if (!$usuario->password_reset_code || $usuario->password_reset_code !== $validated['code']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Código inválido'
+            ], 400);
+        }
+
+        if (Carbon::now()->greaterThan($usuario->password_reset_expires_at)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El código ha expirado'
+            ], 400);
+        }
+
+        $usuario->update([
+            'password' => Hash::make($validated['password']),
+            'password_reset_code' => null,
+            'password_reset_expires_at' => null,
+        ]);
+
+        // cerrar sesiones actuales
+        $usuario->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña restablecida correctamente'
         ]);
     }
 
