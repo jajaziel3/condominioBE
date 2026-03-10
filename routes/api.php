@@ -14,6 +14,7 @@ Route::post('/auth/resend-verification', [AuthController::class, 'resendVerifica
 Route::middleware('auth:sanctum')->group(function () {
     // Rutas de autenticación
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
     Route::get('/auth/user', [AuthController::class, 'getUser']);
     
     // Rutas del chat

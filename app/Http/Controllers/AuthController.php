@@ -158,6 +158,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'device' => 'required|string|max:255', // Identificador del dispositivo
         ]);
 
         $usuario = Usuario::where('email', $validated['email'])->first();
@@ -185,7 +186,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = $usuario->createToken('auth_token')->plainTextToken;
+        $token = $usuario->createToken($validated['device'])->plainTextToken;
 
         return response()->json([
             'success' => true,
@@ -235,6 +236,40 @@ class AuthController extends Controller
                 'id_departamento' => $usuario->id_departamento,
                 'email_verified' => !is_null($usuario->email_verified_at),
             ]
+        ]);
+    }
+
+    /**
+     * Cambiar contraseña
+     */
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        $usuario = $request->user();
+
+        // Verificar contraseña actual
+        if (!Hash::check($validated['current_password'], $usuario->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña actual es incorrecta'
+            ], 400);
+        }
+
+        // Actualizar contraseña
+        $usuario->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        // Eliminar todos los tokens del usuario (cerrar sesión en todos los dispositivos)
+        $usuario->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña cambiada exitosamente. Se ha cerrado la sesión en todos los dispositivos.'
         ]);
     }
 }
