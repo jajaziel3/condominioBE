@@ -25,6 +25,8 @@ class Usuario extends Authenticatable
         'id_departamento',
         'rol',
         'activo',
+        'email_verified_at',
+        'email_verification_token',
     ];
 
     protected $hidden = [
@@ -33,6 +35,7 @@ class Usuario extends Authenticatable
 
     protected $casts = [
         'activo' => 'boolean',
+        'email_verified_at' => 'datetime',
     ];
 
     /**

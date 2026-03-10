@@ -2,40 +2,24 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\ChatController;
 
-// Rutas de autenticación (públicas)
+// Rutas de autenticación (sin protección)
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+Route::post('/auth/resend-verification', [AuthController::class, 'resendVerificationEmail']);
 
-// Rutas protegidas por autenticación
+// Rutas protegidas por Sanctum
 Route::middleware('auth:sanctum')->group(function () {
-    // Autenticación
+    // Rutas de autenticación
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
-
-    // Mensajes
-    Route::prefix('mensajes')->group(function () {
-        Route::post('/enviar', [MensajeController::class, 'enviar']);
-        Route::get('/listar', [MensajeController::class, 'listar']);
-        Route::get('/{id}', [MensajeController::class, 'obtener']);
-        Route::put('/{id}/estado', [MensajeController::class, 'actualizarEstado']);
-        Route::get('/estadisticas/general', [MensajeController::class, 'estadisticas']);
-    });
-
-    // Notificaciones
-    Route::prefix('notificaciones')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\NotificationController::class, 'store']);
-        Route::post('/{id}/marcar-leida', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'show']);
-        Route::delete('/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
+    Route::get('/auth/user', [AuthController::class, 'getUser']);
+    
+    // Rutas del chat
+    Route::prefix('chat')->group(function () {
+        Route::post('/send', [ChatController::class, 'sendMessage']);
+        Route::get('/messages', [ChatController::class, 'getMessages']);
+        Route::get('/stats', [ChatController::class, 'getStats']);
     });
 });
-
-// Ruta pública para obtener mensajes
-Route::get('/mensajes/listar', [MensajeController::class, 'listar']);
-
-// Ruta pública para listar notificaciones (permite lectura sin autenticación para la app)
-Route::get('/notificaciones', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
-

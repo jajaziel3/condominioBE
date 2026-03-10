@@ -13,13 +13,6 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
-            $table->string('category')->default('general');
-            $table->string('title');
-            $table->text('body')->nullable();
-            $table->json('data')->nullable();
-            $table->boolean('is_read')->default(false)->index();
-            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
